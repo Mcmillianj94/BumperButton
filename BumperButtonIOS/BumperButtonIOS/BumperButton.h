@@ -9,11 +9,12 @@
 #import <SpriteKit/SpriteKit.h>
 
 @interface BumperButton : SKSpriteNode
--(id) initWithMasterButtonRadius: (float)mbRadius
-               MasterButtonColor: (UIColor*)mbColor
-                bumperPointCount: (int)bpCount
-               bumperPointColors: (NSArray*)bpColors
-               bumberPointImages: (NSArray*)bpImages;
+-(id) initWithScene: (SKScene*)scene
+ masterButtonRadius: (float)mbRadius
+  MasterButtonColor: (UIColor*)mbColor
+   bumperPointCount: (int)bpCount
+  bumperPointColors: (NSArray*)bpColors
+  bumberPointImages: (NSArray*)bpImages;
 
--(void)masterButtonDidMakeContact;
+-(void)sendUpdateTime: (CFTimeInterval*)currentTime;
 @end
