@@ -11,6 +11,7 @@
 @property BumperButton* bumperButton;
 @property NSMutableArray* bumperPointColors;
 @property SKSpriteNode* testSprite;
+@property NSTimeInterval lastUpdateTime;
 @end
 @implementation GameScene
 
@@ -20,10 +21,12 @@ static const uint32_t leftBumperCollionCONST  = 0x3 << 3;
 static const uint32_t rightBumperCollionCONST  = 0x4 << 4;
 
 -(void)didMoveToView:(SKView *)view {
-    self.physicsWorld.contactDelegate = self;
     
+    self.physicsWorld.contactDelegate = self;
+    self.lastUpdateTime = 0;
     self.bumperPointColors = [[NSMutableArray alloc] initWithObjects:[UIColor redColor],[UIColor blackColor],[UIColor blueColor],[UIColor greenColor], nil];
     
+    //Add button
     self.bumperButton = [[BumperButton alloc] initWithScene: self masterButtonRadius:30.0f MasterButtonColor:[UIColor whiteColor] bumperPointCount:4 bumperPointColors:self.bumperPointColors bumberPointImages:nil];
     [self addChild: self.bumperButton];
     
@@ -60,7 +63,25 @@ static const uint32_t rightBumperCollionCONST  = 0x4 << 4;
 }
 
 -(void)update:(CFTimeInterval)currentTime {
-    [self.bumperButton sendUpdateTime:&currentTime];
+    BOOL isActive = [self.bumperButton buttonIsActive];
+    
+    if (isActive) {
+        CFTimeInterval timeSinceLast = currentTime - self.lastUpdateTime;
+        self.lastUpdateTime = currentTime;
+        if (timeSinceLast > 1){
+            timeSinceLast = 1.0/60.0;
+        }
+        
+        [self executeMasterButtonAction:timeSinceLast];
+        self.lastUpdateTime = currentTime;
+    }
+}
+
+-(void)executeMasterButtonAction: (CFTimeInterval)timeSinceLast{
+    CFTimeInterval lastMainActionTime = timeSinceLast;
+    if (lastMainActionTime > 1) {
+        lastMainActionTime = 0;
+    }
 }
 
 @end

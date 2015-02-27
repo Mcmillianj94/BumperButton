@@ -15,14 +15,17 @@
 @property int bumperPointCount;
 @property NSArray* bumperPointColors;
 @property NSArray* bumperPointImages;
-@property NSTimeInterval* lastUpdateTime;
+
+@property float masterButtonRightBound;
+@property float masterButtonLeftBound;
+@property float masterButtonUpBound;
+@property float masterButtonDownBound;
 //BumperButton UI
 @property SKShapeNode* masterButton;
 @property SKShapeNode* upBumper;
 @property SKShapeNode* downBumper;
 @property SKShapeNode* leftBumper;
 @property SKShapeNode* rightBumper;
-
 @end
 
 @implementation BumperButton
@@ -50,7 +53,6 @@ static const uint32_t rightBumperCollionCONST  = 0x4 << 4;
         self.bumperPointCount = bpCount;
         self.bumperPointColors = bpColors;
         self.bumperPointImages = bpImages;
-        self.lastUpdateTime = 0;
         
         //Create the MasterButton
         self.masterButton = [SKShapeNode shapeNodeWithCircleOfRadius:self.masterButtonRadius];
@@ -94,9 +96,13 @@ static const uint32_t rightBumperCollionCONST  = 0x4 << 4;
         NSMutableArray* bumperArray = [[NSMutableArray alloc] initWithObjects:self.upBumper, self.downBumper, self.leftBumper, self.rightBumper, nil];
         
         //Add the number of bumperPoints specified
-        ////bumperpoints are added in this order Up - Down - Left - Right
-        //////set Image or Color
-        for (NSInteger i = 0; i < bpCount; i++){
+        //bumperpoints are added in this order Up - Down - Left - Right
+        //set Image or Color
+        //If BumperPoint cout is over 4 set it to four
+        if(self.bumperPointCount > 4 ){
+            self.bumperPointCount = 4;
+        }
+        for (NSInteger i = 0; i < self.bumperPointCount; i++){
             SKShapeNode* currentBumper = bumperArray[i];
             
             if (self.bumperPointImages[0] == nil) {
@@ -131,6 +137,12 @@ static const uint32_t rightBumperCollionCONST  = 0x4 << 4;
         [self runAction:moveAction];
         self.hidden = false;
     }
+    
+    //Setbounds for masterButton
+    self.masterButtonUpBound = self.masterButton.frame.origin.y + 10.0f;
+    self.masterButtonDownBound = self.masterButton.frame.origin.y - 10.0f;
+    self.masterButtonRightBound = self.masterButton.frame.origin.x + 28.0f;
+    self.masterButtonLeftBound = self.masterButton.frame.origin.x - 10.0f;
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -139,9 +151,15 @@ static const uint32_t rightBumperCollionCONST  = 0x4 << 4;
     UITouch *touch = [touches anyObject];
     CGPoint positionInScene = [touch locationInNode:self];
     
-    //Move masterButton to new locaton
-    SKAction* moveAction = [SKAction moveTo:positionInScene duration:0];
-    [self.masterButton runAction:moveAction];
+    if (self.masterButton.frame.origin.x < self.masterButtonRightBound) {
+        //Move masterButton to new locaton
+        NSLog(@"%f",self.masterButton.frame.origin.x);
+        SKAction* moveAction = [SKAction moveTo:positionInScene duration:0];
+        [self.masterButton runAction:moveAction];
+    }else{
+        SKAction* moveAction = [SKAction moveTo:CGPointMake(0, 0) duration:0];
+        [self.masterButton runAction:moveAction];
+    }
 }
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -153,16 +171,12 @@ static const uint32_t rightBumperCollionCONST  = 0x4 << 4;
     self.hidden = true;
 }
 
-//MasterButton login (Continuous Action)
--(void)sendUpdateTime: (CFTimeInterval*)currentTime{
-    if (!self.hidden) {
-        CFTimeInterval timeSinceLast = currentTime - self.lastUpdateTime;
-        self.lastUpdateTime = currentTime;
-        if (self.lastUpdateTime > 5) {timeSinceLast = 5.0f/60.0f;}
-        
-        if (timeSinceLast > 5){
-            
-        }
+//Send if button is unhidden
+-(BOOL)buttonIsActive{
+    if (self.hidden == true) {
+        return false;
+    }else{
+        return true;
     }
 }
 @end

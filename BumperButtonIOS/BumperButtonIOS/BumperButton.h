@@ -16,5 +16,5 @@
   bumperPointColors: (NSArray*)bpColors
   bumberPointImages: (NSArray*)bpImages;
 
--(void)sendUpdateTime: (CFTimeInterval*)currentTime;
+-(BOOL)buttonIsActive;
 @end
